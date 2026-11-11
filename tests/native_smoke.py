@@ -168,7 +168,30 @@ def verify_strict_rejection(output, cli):
     assert "SCPC CLI:" in rejected.stderr, (
         "SCPC did not expose the native error", rejected.stderr
     )
-    print("SCPC headless runner: invalid native command rejected with error")
+    # A VALID command ID with an INVALID parameter must also fail under
+    # native --param-check strict. SCPC never keeps its own param tables.
+    invalid_params = folder / "invalid-params.py"
+    invalid_params.write_text(
+        'from scpc import Script\\n'
+        'script = Script()\\n'
+        'script.add("sketch.create", plane="XY", scpc_bad_field=123)\\n',
+        encoding="utf-8",
+    )
+    rejected_param = run(
+        sys.executable, "-m", "scpc", invalid_params,
+        "--run", "--cli", cli, must_succeed=False,
+    )
+    (folder / "invalid-params-result.txt").write_text(
+        f"exit_code: {rejected_param.returncode}\\n"
+        f"stdout:\\n{rejected_param.stdout}\\nstderr:\\n{rejected_param.stderr}",
+        encoding="utf-8",
+    )
+    assert rejected_param.returncode != 0, (
+        "SolidCraft's strict checking accepted unknown sketch.create parameter",
+        rejected_param.stdout, rejected_param.stderr,
+    )
+    assert "SCPC CLI:" in rejected_param.stderr
+    print("SCPC headless runner: invalid command AND invalid native params rejected")
 
 
 def verify(output, cli):
