@@ -37,7 +37,7 @@ To also test with your installed **native SolidCraft 0.30.1** CLI:
 
 The native test runs our Plate Python script through the actual CAD engine,
 saves editable `.sc` documents for **Plate and CornerBracket**, measures
-both geometries, checks their complete feature timelines and verifies that SolidCraft **rejects invalid commands and parameters**.
+both geometries, checks their complete feature timelines and verifies that SolidCraft **rejects unknown command IDs**. The tests also document that native 0.30.1 can silently ignore unknown extra parameter keys even with strict validation.
 It also checks that native command discovery comes from the installed CLI.
 
 GitHub Actions independently runs **both** test levels on every PR:
