@@ -18,6 +18,35 @@ python -m pip install -e .
 python -m unittest discover -s tests -v
 ```
 
+## Test the API and scripts before building a UI
+
+For local development, run **fast Python and local-control protocol tests**
+without opening SolidCraft:
+
+```powershell
+.\scripts\test.ps1
+```
+
+To also test with your installed **native SolidCraft 0.30.1** CLI:
+
+```powershell
+.\scripts\test.ps1 -Native
+```
+
+The native test runs our Plate Python script through the actual CAD engine,
+saves an editable `.sc` document, measures its 3D geometry, checks the
+feature timeline and verifies that SolidCraft **rejects an invalid command**.
+It also checks that native command discovery comes from the installed CLI.
+
+GitHub Actions independently runs **both** test levels on every PR:
+an offline Python/socket suite and a verified native SolidCraft 0.30.1 run.
+The CAD models repository additionally compares the separately authored
+SCPF and SCPC Plate and CornerBracket geometries.
+
+See the small [public Python API reference](docs/api.md) and the
+[testing instructions and test coverage](docs/testing.md).
+The future VS Code Command Explorer is deliberately out of scope for now.
+
 ## Write a native SolidCraft model
 
 ```python
@@ -78,7 +107,8 @@ validation remains the installed SolidCraft engine.
 
 The CAD repository
 [2026-011-02.cad.solidcraft](https://github.com/brainboxemb/2026-011-02.cad.solidcraft)
-will have independent `scpf/model.py` and `scpc/model.py` variants.
+already has independent `scpf/model.py` and `scpc/model.py` variants
+for Plate and CornerBracket.
 The latter must describe native commands *directly*, not simply load
 Forge's generated JSON. CI should compare real native geometry and
 editable history, not merely compare whether JSON parses.
