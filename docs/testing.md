@@ -130,3 +130,16 @@ hundreds of generated Python wrapper methods or parameter tables.
 **All CAD geometry, edge selection and validation are SolidCraft's job.**
 For each new API ability, add an offline test and, where CAD behavior
 matters, an actual native CLI integration test.
+
+## Important limitation of native strict checking (SolidCraft 0.30.1)
+
+The native CLI's `--param-check strict` is useful but **not a complete
+rejection of every unknown argument key**. In our real-engine test, an
+extra `scpc_bad_field=123` on `sketch.create` was accepted and ignored.
+This is native SolidCraft behavior, not something SCPC repairs.
+
+The test stores `negative-tests/unknown-parameter-result.txt` to make
+that behavior visible; it separately checks an unknown **command ID**
+is rejected. Do not claim that a green `--param-check strict` proves
+every parameter name is valid. For critical models, verify the evaluated
+native geometry and feature timeline as well.
