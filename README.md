@@ -1,5 +1,7 @@
 # SCPC — SolidCraft Python Commands
 
+**Documentation and verified examples:** [SCPC GitHub Pages](https://brainboxemb.github.io/lib.py.solidcraft.cmd/) · [API](https://brainboxemb.github.io/lib.py.solidcraft.cmd/guide/api/) · [Tests](https://brainboxemb.github.io/lib.py.solidcraft.cmd/guide/testing/)
+
 **Native SolidCraft commands, written conveniently in Python.** This
 repository is separate from
 [SCPF — SolidCraft Python Forge](https://github.com/brainboxemb/lib.py.solidcraft.forge).
@@ -35,7 +37,7 @@ To also test with your installed **native SolidCraft 0.30.1** CLI:
 
 The native test runs our Plate Python script through the actual CAD engine,
 saves editable `.sc` documents for **Plate and CornerBracket**, measures
-both geometries, checks their complete feature timelines and verifies that SolidCraft **rejects an invalid command**.
+both geometries, checks their complete feature timelines and verifies that SolidCraft **rejects invalid commands and parameters**.
 It also checks that native command discovery comes from the installed CLI.
 
 GitHub Actions independently runs **both** test levels on every PR:
@@ -106,6 +108,23 @@ These use **`solidcraft-cli commands`** (`engine.commands`) and
 **`engine.describe`**, respectively. SCPC does not keep a hardcoded
 command catalog. Therefore the authority for parameters, units and
 validation remains the installed SolidCraft engine.
+
+## GitHub Pages documentation
+
+The [SCPC library website](https://brainboxemb.github.io/lib.py.solidcraft.cmd/)
+is built automatically from this repository's Python source and Markdown guides.
+It publishes native-verified models (editable `.sc`, commands, renders and
+feature histories) only from the **same checked-out and verified source commit**.
+
+Pages deployment is a separate CI job: Python, Windows PowerShell and real
+SolidCraft 0.30.1 tests must all succeed before the site builds and
+publishes to the `gh-pages` branch. The page builder uses
+`site/requirements.txt` and `site/build.py`. See `site/test_site.py`
+for the source/provenance and internal-link checks.
+
+The [brainboxemb homepage](https://brainboxemb.github.io/) already has a
+**SolidCraft Commands** link beside Forge and the CAD models. GitHub Pages
+must have its publishing source set to `gh-pages` / `/ (root)`.
 
 ## What comes next
 
