@@ -33,7 +33,10 @@ python -m unittest discover -s tests -p "test_*.py" -v
 
 The tests cover the `Script` API, JSON immutability, model script
 loading, command discovery plumbing, headless CLI argument construction
-and authenticated live-control messages.
+and authenticated live-control messages. GitHub Actions runs the documented
+`scripts/test.ps1` on a **real Windows runner** as well as running the
+Python tests on Linux. This detects Windows-specific installation, path
+and PowerShell problems before the local developer has to diagnose them.
 
 The live-control tests use a **local fake TCP endpoint** with temporary
 `current.port` and token files. They test *real socket serialization*
