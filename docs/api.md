@@ -72,4 +72,7 @@ API, not a second backend.
 ## Testing
 
 See [testing.md](testing.md) for offline API/socket tests, actual native
-SolidCraft 0.30.1 CAD verification and dual SCPC/SCPF model tests.
+SolidCraft 0.30.1 verification of **Plate and CornerBracket**, and dual
+SCPC/SCPF model tests. The [native command examples](native-examples.md)
+show how to read the generated command plans and reason about SolidCraft
+sketches, features and edge selectors.
