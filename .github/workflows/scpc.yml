@@ -1,10 +1,13 @@
-name: SCPC Python and native SolidCraft qualification
+name: SCPC qualification and API Pages
 
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   unit:
@@ -56,12 +59,24 @@ jobs:
           grep -F " $ARCHIVE" SHA256SUMS.txt | sha256sum --check
           tar -xzf "$ARCHIVE"
           echo "$RUNNER_TEMP/solidcraft-${SOLIDCRAFT_VERSION}-linux-x86_64/bin" >> "$GITHUB_PATH"
-      - name: Execute Python SCPC Plate in the REAL native engine
+      - name: Execute two SCPC Python models in REAL native SolidCraft
         shell: bash
         run: |
           set -euo pipefail
           solidcraft-cli --version
           python tests/native_smoke.py --output-dir output/native-smoke
+      - name: Render native examples and attest exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          for model in plate corner-bracket; do
+            solidcraft-cli snapshot "output/native-smoke/$model/model.sc" \
+              --out "output/native-smoke/$model/preview.png" --no-grid --no-axes
+            test -s "output/native-smoke/$model/preview.png"
+          done
+          jq -n --arg source "$GITHUB_SHA" \
+            '{source_commit:$source,solidcraft_version:"0.30.1",verified:true}' \
+            > output/native-smoke/verification.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -83,3 +98,43 @@ jobs:
       - name: Test documented Windows command
         shell: pwsh
         run: .\scripts\test.ps1
+
+  pages:
+    name: Build, check and publish library Pages
+    runs-on: ubuntu-latest
+    needs: [unit, native, windows]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install SCPC and documentation renderer
+        run: |
+          python -m pip install -e .
+          python -m pip install -r site/requirements.txt
+      - name: Download source-matched real native SolidCraft evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: scpc-native-smoke
+          path: output/native-smoke
+      - name: Generate and validate static Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python site/build.py --out output/site --source-sha "$GITHUB_SHA" --native output/native-smoke
+          python site/test_site.py output/site "$GITHUB_SHA"
+      - name: Upload browsable SCPC site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scpc-library-pages
+          path: output/site/
+          if-no-files-found: error
+      - name: Publish to gh-pages after all tests pass
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./output/site
+          keep_files: false
+          commit_message: "Native-verified SCPC Pages at ${{ github.sha }}"
