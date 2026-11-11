@@ -83,3 +83,40 @@ jobs:
       - name: Test documented Windows command
         shell: pwsh
         run: .\scripts\test.ps1
+
+  pages:
+    name: Build and publish SCPC GitHub Pages
+    needs: [unit, native, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install SCPC for site generation
+        run: python -m pip install -e .
+      - name: Build and validate documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python site/build.py --out output/site --source-sha "$GITHUB_SHA"
+          python site/test_site.py output/site "$GITHUB_SHA"
+      - name: Save site preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: scpc-pages-preview
+          path: output/site
+          if-no-files-found: error
+          include-hidden-files: true
+      - name: Publish to own gh-pages branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./output/site
+          keep_files: false
+          enable_jekyll: false
+          commit_message: "Verified SCPC Pages for ${{ github.sha }}"
