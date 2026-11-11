@@ -1,11 +1,14 @@
-name: SCPC Python library
+name: SCPC Python and native SolidCraft qualification
+
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch: {}
 
 jobs:
-  test:
+  unit:
+    name: Python API + local protocol tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,8 +17,8 @@ jobs:
           python-version: "3.11"
       - name: Install SCPC
         run: python -m pip install -e .
-      - name: Unit tests (native JSON, CLI and discovery contracts)
-        run: python -m unittest discover -s tests -v
+      - name: Unit and fake-control-endpoint tests (no GUI)
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Example compiles to native JSON
         run: |
           python -m scpc examples/plate/model.py --out output/plate.json
@@ -26,3 +29,42 @@ jobs:
           assert len(d["commands"]) == 12
           assert d["commands"][-1]["command"] == "solid.hole"
           PY
+
+  native:
+    name: Real SolidCraft 0.30.1 CLI smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOLIDCRAFT_VERSION: "0.30.1"
+      SOLIDCRAFT_GPU: cpu
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install SCPC
+        run: python -m pip install -e .
+      - name: Download official verified SolidCraft binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          BASE="https://github.com/tangency-labs/solidcraft/releases/download/v${SOLIDCRAFT_VERSION}"
+          ARCHIVE="solidcraft-${SOLIDCRAFT_VERSION}-linux-x86_64.tar.gz"
+          curl --fail --location --retry 3 --silent --show-error "$BASE/SHA256SUMS.txt" --output SHA256SUMS.txt
+          curl --fail --location --retry 3 --silent --show-error "$BASE/$ARCHIVE" --output "$ARCHIVE"
+          grep -F " $ARCHIVE" SHA256SUMS.txt | sha256sum --check
+          tar -xzf "$ARCHIVE"
+          echo "$RUNNER_TEMP/solidcraft-${SOLIDCRAFT_VERSION}-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Execute Python SCPC Plate in the REAL native engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          solidcraft-cli --version
+          python tests/native_smoke.py --output-dir output/native-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scpc-native-smoke
+          path: output/native-smoke/
+          if-no-files-found: warn
