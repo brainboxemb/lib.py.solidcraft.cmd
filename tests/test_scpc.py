@@ -11,7 +11,7 @@ from scpc.live import LiveError, send_batch
 from scpc.native import run_cli, CliError
 from scpc.__main__ import main
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class ScriptTests(unittest.TestCase):
