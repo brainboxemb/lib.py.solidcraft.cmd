@@ -62,17 +62,29 @@ The test performs this sequence:
 - Confirm the installed SolidCraft CLI reports **0.30.1**.
 - Call `python -m scpc --commands` and verify the actual engine
   advertises the native commands used by the example.
-- Generate the Plate command JSON from `examples/plate/model.py`.
-- Run the same SCPC Python script in the **real SolidCraft engine**
-  with strict native parameter validation, saving `plate.sc`.
+- Generate both the Plate and CornerBracket native command JSON directly
+  from their independent `examples/<model>/model.py` files.
+- Run **both** SCPC Python scripts in the **real SolidCraft engine**
+  with strict native parameter validation, saving a separate `model.sc`
+  in each model's directory.
 - Confirm `plate.sc` is a valid native SolidCraft document.
-- Evaluate its BRep: exactly one Plate, bounding box
-  **100 × 60 × 10 mm**, with a nonempty error-free feature timeline.
-- Deliberately send an unknown native command and verify that SolidCraft
-  rejects it. A JSON document being well formed is not sufficient.
+- Evaluate both actual BReps: **Plate** has a 100 × 60 × 10 mm
+  bounding box and 7 features; **CornerBracket** has X=−12..60,
+  Y=−12..12, Z=−60..12 mm, approximately 36,771.09 mm³ of material,
+  and 6 features (sketch, extrusion, fillet, three chamfers). These
+  expected results come from independent native SolidCraft runs, not
+  from the JSON itself.
+- Deliberately run a Python SCPC script with an unknown native command
+  and verify that **SCPC propagates SolidCraft's failure**. A JSON
+  document being well formed is not sufficient.
+- Confirm that **every command used** in both scripts is advertised
+  by the current native `solidcraft-cli commands` registry and that
+  it comes with a label and parameter documentation.
 
-The output directory contains the native `.sc` file, measurements,
-native command registry, the command JSON and a failed-command report.
+The output contains `plate/` and `corner-bracket/` with their own
+  `model.sc`, `commands.json` and `measurements.json`. At the root are
+  the authoritative `command-registry.json` and the
+  `negative-tests/invalid-command-result.txt` report.
 
 GitHub Actions runs these same tests using the official
 **v0.30.1 Linux release**, downloaded and checksum-verified against
