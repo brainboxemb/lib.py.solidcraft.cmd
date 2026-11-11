@@ -1,0 +1,28 @@
+name: SCPC Python library
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install SCPC
+        run: python -m pip install -e ./scpc
+      - name: Unit tests (native JSON, CLI and discovery contracts)
+        run: python -m unittest discover -s scpc/tests -v
+      - name: Example compiles to native JSON
+        run: |
+          python -m scpc examples/plate/model.py --out output/plate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("output/plate.json").read_text())
+          assert len(d["commands"]) == 12
+          assert d["commands"][-1]["command"] == "solid.hole"
+          PY
