@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Overview — SCPC</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="./"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="./">Overview</a>
+        <a href="./examples/plate/">Plate example</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd/blob/main/docs/api.md">API reference ↗</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  
+<main class="wrap">
+  <section class="hero">
+    <p class="kicker">SOLIDCRAFT · PYTHON · NATIVE COMMANDS</p>
+    <h1>Write SolidCraft commands in Python.</h1>
+    <p class="lead">SCPC is a small, direct interface to SolidCraft's native command API.
+       Build an ordered command script without manually writing JSON or creating
+       a second CAD modelling language.</p>
+    <div class="actions">
+      <a class="button button-primary" href="examples/plate/">Explore the Plate example →</a>
+      <a class="button button-secondary" href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">View source on GitHub ↗</a>
+    </div>
+    <div class="hero-graphic" aria-hidden="true">
+      <div class="graphic-code">sketch.create<br>sketch.rectangle.two_point<br>sketch.finish<br>solid.extrude</div>
+      <div class="graphic-arrow">→</div>
+      <svg viewBox="0 0 240 160" role="presentation">
+        <path d="M20 75 L137 37 220 73 101 116Z" fill="#b5e2ee" stroke="#72c9d8" stroke-width="2"/>
+        <path d="M20 75 V92 L101 134 V116Z" fill="#378bab" stroke="#72c9d8" stroke-width="2"/>
+        <path d="M101 116 L220 73 V92 L101 134Z" fill="#206b90" stroke="#72c9d8" stroke-width="2"/>
+        <ellipse cx="79" cy="75" rx="14" ry="7" fill="#123959" stroke="#77cbd7" stroke-width="2"/>
+        <ellipse cx="167" cy="78" rx="14" ry="7" fill="#123959" stroke="#77cbd7" stroke-width="2"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="three" aria-label="How SCPC works">
+    <article class="tile"><span class="step">01</span><h2>Describe</h2>
+      <p>Use <code>Script.add(native_command, **params)</code>. IDs and parameters
+      follow SolidCraft itself, not SCPC-specific geometry rules.</p></article>
+    <article class="tile"><span class="step">02</span><h2>Export</h2>
+      <p>Generate the native <code>{"commands":[...]}</code> JSON, with the original
+      order and parameter names preserved.</p></article>
+    <article class="tile"><span class="step">03</span><h2>Execute</h2>
+      <p>Run with the verified native CLI or send a batch to an already-open
+      SolidCraft GUI document. The CAD engine performs the modelling.</p></article>
+  </section>
+
+  <section class="split">
+    <div>
+      <p class="kicker dark">A MINIMAL EXAMPLE</p>
+      <h2>Native operations, readable Python</h2>
+      <p>This is the same command vocabulary exposed by SolidCraft.
+      There is no mandatory <code>main()</code> or <code>show()</code>.</p>
+      <p><a href="examples/plate/">See the complete Plate script, command JSON and verification details →</a></p>
+    </div>
+    <pre><code>script = Script()
+script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Base&quot;)
+script.add(&quot;sketch.rectangle.two_point&quot;, p0=[0, 0], p1=[100, 60])
+script.add(&quot;sketch.finish&quot;)
+script.add(&quot;solid.extrude&quot;, distance=&quot;10 mm&quot;, body_name=&quot;Plate&quot;)</code></pre>
+  </section>
+
+  <section class="resources">
+    <h2>Learn and test</h2>
+    <div class="resource-grid">
+      <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd/blob/main/docs/api.md"><strong>SCPC API reference ↗</strong>
+        <span>Script, export, CLI execution, GUI connection and discovery.</span></a>
+      <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd/blob/main/docs/testing.md"><strong>Verification &amp; testing ↗</strong>
+        <span>Python tests, authenticated control protocol and native SolidCraft 0.30.1 checks.</span></a>
+      <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/"><strong>SolidCraft Forge (SCPF) ↗</strong>
+        <span>A separate higher-level Python modelling interface.</span></a>
+      <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/"><strong>CAD projects ↗</strong>
+        <span>Actual models and independent SCPF/SCPC comparisons.</span></a>
+    </div>
+    <p class="source-note">Built from source commit <code>99fd2027a98be105922db147b6e37c76aeeb2d85</code>.</p>
+  </section>
+</main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

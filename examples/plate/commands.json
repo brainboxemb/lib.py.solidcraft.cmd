@@ -1,0 +1,144 @@
+{
+  "commands": [
+    {
+      "command": "parameters.add",
+      "params": {
+        "name": "length",
+        "expression": "100",
+        "unit": "mm"
+      }
+    },
+    {
+      "command": "parameters.add",
+      "params": {
+        "name": "width",
+        "expression": "60",
+        "unit": "mm"
+      }
+    },
+    {
+      "command": "parameters.add",
+      "params": {
+        "name": "thickness",
+        "expression": "10",
+        "unit": "mm"
+      }
+    },
+    {
+      "command": "sketch.create",
+      "params": {
+        "plane": "XY",
+        "name": "Plate footprint"
+      }
+    },
+    {
+      "command": "sketch.rectangle.two_point",
+      "params": {
+        "p0": [
+          "-length / 2",
+          "-width / 2"
+        ],
+        "p1": [
+          "length / 2",
+          "width / 2"
+        ]
+      }
+    },
+    {
+      "command": "sketch.finish",
+      "params": {}
+    },
+    {
+      "command": "solid.extrude",
+      "params": {
+        "distance": "thickness",
+        "body_name": "Plate"
+      }
+    },
+    {
+      "command": "solid.fillet",
+      "params": {
+        "body": "Plate",
+        "radius": 2,
+        "edges": [
+          [
+            -50,
+            -30,
+            5
+          ],
+          [
+            50,
+            -30,
+            5
+          ],
+          [
+            50,
+            30,
+            5
+          ],
+          [
+            -50,
+            30,
+            5
+          ]
+        ]
+      }
+    },
+    {
+      "command": "solid.hole",
+      "params": {
+        "position": [
+          -35,
+          -15,
+          10
+        ],
+        "diameter": 8,
+        "targets": [
+          "Plate"
+        ]
+      }
+    },
+    {
+      "command": "solid.hole",
+      "params": {
+        "position": [
+          35,
+          -15,
+          10
+        ],
+        "diameter": 8,
+        "targets": [
+          "Plate"
+        ]
+      }
+    },
+    {
+      "command": "solid.hole",
+      "params": {
+        "position": [
+          35,
+          15,
+          10
+        ],
+        "diameter": 8,
+        "targets": [
+          "Plate"
+        ]
+      }
+    },
+    {
+      "command": "solid.hole",
+      "params": {
+        "position": [
+          -35,
+          15,
+          10
+        ],
+        "diameter": 8,
+        "targets": [
+          "Plate"
+        ]
+      }
+    }
+  ]
+}

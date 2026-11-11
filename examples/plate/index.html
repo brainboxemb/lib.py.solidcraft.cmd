@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Plate example — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd/blob/main/docs/api.md">API reference ↗</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  
+<main class="wrap">
+  <p class="crumb"><a href="../../">← Overview</a> / Plate example</p>
+  <section class="example-intro">
+    <p class="kicker dark">NATIVE COMMAND SCRIPT</p>
+    <h1>Plate with rounded edges and holes</h1>
+    <p>A complete SCPC Plate fixture: parameters, sketch, extrusion, fillet
+       and four native hole commands. Its JSON is produced from the actual
+       Python source on every build, not copied by hand.</p>
+    <p class="badge">12 native commands · tested with SolidCraft 0.30.1 in CI</p>
+  </section>
+  <div class="example-grid">
+    <section class="panel"><h2>Python source</h2>
+      <pre><code>&quot;&quot;&quot;A complete native Plate, written as SCPC commands, NOT as a Forge model.
+
+Compare models/basic/plate/scpf/model.py in the CAD project.
+Everything below is already a SolidCraft command ID or parameter.
+&quot;&quot;&quot;
+from scpc import Script
+
+script = Script()
+
+for name, value in ((&quot;length&quot;, 100), (&quot;width&quot;, 60), (&quot;thickness&quot;, 10)):
+    script.add(&quot;parameters.add&quot;, name=name, expression=str(value), unit=&quot;mm&quot;)
+
+script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Plate footprint&quot;)
+script.add(&quot;sketch.rectangle.two_point&quot;,
+           p0=[&quot;-length / 2&quot;, &quot;-width / 2&quot;],
+           p1=[&quot;length / 2&quot;, &quot;width / 2&quot;])
+script.add(&quot;sketch.finish&quot;)
+script.add(&quot;solid.extrude&quot;, distance=&quot;thickness&quot;, body_name=&quot;Plate&quot;)
+
+# These are the native SolidCraft edge positions, not a SCPC fillet helper.
+script.add(&quot;solid.fillet&quot;, body=&quot;Plate&quot;, radius=2,
+           edges=[[-50, -30, 5], [50, -30, 5],
+                  [50, 30, 5], [-50, 30, 5]])
+for x, y in ((-35, -15), (35, -15), (35, 15), (-35, 15)):
+    script.add(&quot;solid.hole&quot;, position=[x, y, 10],
+               diameter=8, targets=[&quot;Plate&quot;])
+</code></pre>
+      <a href="model.py">View model.py →</a>
+    </section>
+    <section class="panel"><h2>Native command sequence</h2>
+      <ol class="command-list"><li><code>parameters.add</code></li><li><code>parameters.add</code></li><li><code>parameters.add</code></li><li><code>sketch.create</code></li><li><code>sketch.rectangle.two_point</code></li><li><code>sketch.finish</code></li><li><code>solid.extrude</code></li><li><code>solid.fillet</code></li><li><code>solid.hole</code></li><li><code>solid.hole</code></li><li><code>solid.hole</code></li><li><code>solid.hole</code></li></ol>
+      <p><a class="button button-primary" href="commands.json">View generated JSON →</a></p>
+    </section>
+  </div>
+  <section class="notice"><strong>Verification boundaries.</strong>
+    The Python API and JSON format are tested independently of the actual
+    CAD geometry. A separate CI job runs the native SolidCraft 0.30.1 engine,
+    checks the resulting Plate and its feature history, and reports failures.
+    <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd/blob/main/docs/testing.md">Read the test methodology →</a>
+  </section>
+</main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>
