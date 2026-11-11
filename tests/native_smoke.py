@@ -172,9 +172,9 @@ def verify_strict_rejection(output, cli):
     # native --param-check strict. SCPC never keeps its own param tables.
     invalid_params = folder / "invalid-params.py"
     invalid_params.write_text(
-        'from scpc import Script\\n'
-        'script = Script()\\n'
-        'script.add("sketch.create", plane="XY", scpc_bad_field=123)\\n',
+        'from scpc import Script\n'
+        'script = Script()\n'
+        'script.add("sketch.create", plane="XY", scpc_bad_field=123)\n',
         encoding="utf-8",
     )
     rejected_param = run(
@@ -182,8 +182,8 @@ def verify_strict_rejection(output, cli):
         "--run", "--cli", cli, must_succeed=False,
     )
     (folder / "invalid-params-result.txt").write_text(
-        f"exit_code: {rejected_param.returncode}\\n"
-        f"stdout:\\n{rejected_param.stdout}\\nstderr:\\n{rejected_param.stderr}",
+        f"exit_code: {rejected_param.returncode}\n"
+        f"stdout:\n{rejected_param.stdout}\nstderr:\n{rejected_param.stderr}",
         encoding="utf-8",
     )
     assert rejected_param.returncode != 0, (
