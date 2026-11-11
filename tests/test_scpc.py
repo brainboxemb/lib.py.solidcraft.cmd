@@ -107,5 +107,47 @@ class DiscoveryTests(unittest.TestCase):
                 send_batch(cmd)
 
 
+class ExampleModelTests(unittest.TestCase):
+    def test_native_examples_are_independent_and_readable(self):
+        for slug, count, expected_body in (
+            ("plate", 12, "Plate"),
+            ("corner-bracket", 17, "CornerBracket"),
+        ):
+            with self.subTest(slug=slug):
+                source = ROOT / "examples" / slug / "model.py"
+                text = source.read_text(encoding="utf-8")
+                # Examples are not Forge-output wrappers or copies of JSON.
+                self.assertIn("script.add(", text)
+                self.assertNotIn("from scpf", text)
+                self.assertNotIn("json.load(", text)
+                native = load_script(source).to_dict()["commands"]
+                self.assertEqual(len(native), count)
+                extrusions = [
+                    item["params"]["body_name"] for item in native
+                    if item["command"] == "solid.extrude"
+                ]
+                self.assertEqual(extrusions, [expected_body])
+                self.assertTrue(all(
+                    set(item) == {"command", "params"} for item in native
+                ))
+
+    def test_corner_bracket_uses_exact_native_selection_and_features(self):
+        path = ROOT / "examples/corner-bracket/model.py"
+        commands = load_script(path).commands
+        kinds = [item["command"] for item in commands]
+        self.assertEqual(kinds.count("solid.fillet"), 1)
+        self.assertEqual(kinds.count("solid.chamfer"), 3)
+        self.assertEqual(kinds.count("solid.hole"), 0)
+        fillet = next(item["params"] for item in commands
+                      if item["command"] == "solid.fillet")
+        self.assertEqual(fillet["radius"], 4)
+        self.assertEqual(fillet["edges"], [[0, 0, 0]])
+        sketch = next(item["params"] for item in commands
+                      if item["command"] == "sketch.line")
+        self.assertEqual(len(sketch["points"]), 9)
+        self.assertTrue(sketch["closed"])
+        self.assertEqual(len(sketch["ids"]), 9)
+
+
 if __name__ == "__main__":
     unittest.main()
