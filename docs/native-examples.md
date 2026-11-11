@@ -168,3 +168,12 @@ match—not merely that the JSON is structurally valid.
 Those cases must be tested separately and should not be described as
 automatically verified by the headless tests. Keeping these boundaries
 explicit prevents false confidence in our Python API.
+
+## Observed strict-validation caveat
+
+SolidCraft 0.30.1 rejects unknown native command IDs, but our real
+native test found that `sketch.create` can accept an **extra unknown
+parameter key** under `--param-check strict`. Avoid relying solely on
+strict mode to catch typos in parameter names. Read the native registry,
+query live schemas where available, and always verify the resulting BRep
+and feature history for important models.
