@@ -168,30 +168,31 @@ def verify_strict_rejection(output, cli):
     assert "SCPC CLI:" in rejected.stderr, (
         "SCPC did not expose the native error", rejected.stderr
     )
-    # A VALID command ID with an INVALID parameter must also fail under
-    # native --param-check strict. SCPC never keeps its own param tables.
-    invalid_params = folder / "invalid-params.py"
-    invalid_params.write_text(
+    # Native SolidCraft 0.30.1 currently IGNORES an unrecognized extra
+    # sketch.create parameter even in '--param-check strict'. Capture this
+    # fact rather than claiming SCPC/CLI performs exhaustive schema checks.
+    unknown_param = folder / "unknown-parameter.py"
+    unknown_param.write_text(
         'from scpc import Script\n'
         'script = Script()\n'
         'script.add("sketch.create", plane="XY", scpc_bad_field=123)\n',
         encoding="utf-8",
     )
-    rejected_param = run(
-        sys.executable, "-m", "scpc", invalid_params,
-        "--run", "--cli", cli, must_succeed=False,
+    outcome = run(
+        sys.executable, "-m", "scpc", unknown_param, "--run", "--cli", cli,
+        must_succeed=False,
     )
-    (folder / "invalid-params-result.txt").write_text(
-        f"exit_code: {rejected_param.returncode}\n"
-        f"stdout:\n{rejected_param.stdout}\nstderr:\n{rejected_param.stderr}",
+    (folder / "unknown-parameter-result.txt").write_text(
+        f"exit_code: {outcome.returncode}\n"
+        f"stdout:\n{outcome.stdout}\nstderr:\n{outcome.stderr}",
         encoding="utf-8",
     )
-    assert rejected_param.returncode != 0, (
-        "SolidCraft's strict checking accepted unknown sketch.create parameter",
-        rejected_param.stdout, rejected_param.stderr,
-    )
-    assert "SCPC CLI:" in rejected_param.stderr
-    print("SCPC headless runner: invalid command AND invalid native params rejected")
+    if outcome.returncode == 0:
+        print("Native caveat: SolidCraft 0.30.1 allows unknown sketch.create keys "
+              "under --param-check strict; not exhaustive schema validation")
+    else:
+        print("Native now rejects unknown sketch.create keys; "
+              "review stricter behavior before updating docs")
 
 
 def verify(output, cli):
