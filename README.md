@@ -34,8 +34,8 @@ To also test with your installed **native SolidCraft 0.30.1** CLI:
 ```
 
 The native test runs our Plate Python script through the actual CAD engine,
-saves an editable `.sc` document, measures its 3D geometry, checks the
-feature timeline and verifies that SolidCraft **rejects an invalid command**.
+saves editable `.sc` documents for **Plate and CornerBracket**, measures
+both geometries, checks their complete feature timelines and verifies that SolidCraft **rejects an invalid command**.
 It also checks that native command discovery comes from the installed CLI.
 
 GitHub Actions independently runs **both** test levels on every PR:
@@ -62,7 +62,11 @@ script.add("solid.extrude", distance="10 mm", body_name="Plate")
 
 There is **no** `main()` or `show()`; simply define exactly one
 `Script` instance called `script` (or any other variable name).
-See [Plate](examples/plate/model.py) for a complete model.
+Study both native command models:
+[Plate](examples/plate/model.py) — a sketch, extrusion, R2 fillet and
+four holes; and [CornerBracket](examples/corner-bracket/model.py) — a
+named polygonal sketch, symmetric extrusion, R4 fillet and three chamfers.
+They use the same small SCPC API, with no Forge dependency.
 
 Export native JSON without starting SolidCraft:
 
