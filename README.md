@@ -14,8 +14,8 @@ transformation matrices or define a second modelling API.
 From this repository root in your existing Conda/Python environment:
 
 ```powershell
-python -m pip install -e ./scpc
-python -m unittest discover -s scpc/tests -v
+python -m pip install -e .
+python -m unittest discover -s tests -v
 ```
 
 ## Write a native SolidCraft model
