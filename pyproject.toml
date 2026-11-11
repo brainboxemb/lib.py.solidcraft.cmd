@@ -12,6 +12,9 @@ dependencies = []
 [project.scripts]
 scpc = "scpc.__main__:main"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["scpc*"]
