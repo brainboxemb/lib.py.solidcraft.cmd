@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Script API and JSON — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / Script API and JSON</p><h1>Script API and JSON</h1><p class="guide-lead">Script.add(), native parameters, export, import and trusted Python loading.</p>
+<h2 id="add">Build an ordered native command sequence</h2>
+<p><code>Script.add(command, **params)</code> appends one command and
+returns the same Script, so calls can be chained. The command ID and keyword
+names are passed through unchanged. They are <em>SolidCraft's</em>
+names rather than aliases invented by SCPC.</p>
+<pre><code>from scpc import Script
+
+script = Script()
+script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Base&quot;)
+script.add(&quot;sketch.finish&quot;)
+assert len(script) == 2</code></pre>
+<h2 id="read">Inspect and save commands</h2>
+<p><code>script.commands</code> returns a detached copy of the ordered
+command entries. <code>to_dict()</code> returns the full native document;
+<code>to_json()</code> serialises it to readable UTF-8 JSON;
+<code>save(path)</code> creates the destination directory if needed and
+writes the file.</p>
+<pre><code>commands = script.commands
+document = script.to_dict()   # {&quot;commands&quot;: [...]}
+json_text = script.to_json()
+script.save(&quot;output/commands.json&quot;)</code></pre>
+<h2 id="import">Import JSON without running Python</h2>
+<p>SCPC can reopen the native JSON format directly, which is useful for
+comparing generated scripts or replaying a fixed command sequence.
+Import is structural, not CAD validation.</p>
+<pre><code>restored = Script.load(&quot;output/commands.json&quot;)
+restored = Script.from_json(json_text)
+restored = Script.from_dict(document)</code></pre>
+<p>The input must have exactly a top-level <code>commands</code> array;
+every entry must contain a nonempty <code>command</code> string and a
+<code>params</code> object. Malformed JSON, extra structural fields,
+unsupported Python values and non-finite numbers are rejected. The
+original order and parameter values are preserved.</p>
+<h2 id="load-model">Loading a Python model</h2>
+<p><code>load_script("model.py")</code> executes a <strong>trusted</strong>
+Python file and finds its single nonempty Script instance. Loading
+<code>.json</code> with <code>Script.load()</code> does <em>not</em>
+execute Python. Never evaluate an unknown Python model as untrusted input.</p>
+<pre><code>from scpc import load_script
+
+plan = load_script(&quot;examples/plate/model.py&quot;)
+print(len(plan), plan.commands[0][&quot;command&quot;])</code></pre>
+<h2 id="scope">What this API does not do</h2>
+<p>SCPC does not implement geometry, named edge selectors, automatic
+coordinate transforms or separate <code>Fillet</code> and
+<code>Hole</code> Python classes. It only serialises native command
+requests. The native engine decides whether an operation is valid.</p>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

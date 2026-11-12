@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Native commands and features — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / Native commands and features</p><h1>Native commands and features</h1><p class="guide-lead">Sketches, extrusion, fillet and holes through the real SolidCraft vocabulary.</p>
+<h2 id="vocabulary">Use SolidCraft's command IDs</h2>
+<p>SCPC does not freeze a list of command IDs or parameters. Obtain the
+authoritative registry and schemas from the <em>installed</em> SolidCraft
+version (see <a href="../discovery/">Command discovery</a>).
+The examples below are verified with SolidCraft <strong>0.30.1</strong>;
+other versions may differ.</p>
+<h2 id="sketch">Create and finish a sketch</h2>
+<p>Every command is explicit. First create the XY sketch, draw its
+rectangle and finish the sketch before extruding.</p>
+<pre><code>script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Plate footprint&quot;)
+script.add(&quot;sketch.rectangle.two_point&quot;,
+           p0=[-50, -30], p1=[50, 30])
+script.add(&quot;sketch.finish&quot;)
+script.add(&quot;solid.extrude&quot;, distance=&quot;10 mm&quot;, body_name=&quot;Plate&quot;)</code></pre>
+<h2 id="parameters">Native model parameters</h2>
+<p>Names and expressions remain editable in the SolidCraft document.
+These are native commands, not properties interpreted by SCPC.</p>
+<pre><code>for name, value in ((&quot;length&quot;, 100), (&quot;width&quot;, 60), (&quot;thickness&quot;, 10)):
+    script.add(&quot;parameters.add&quot;, name=name,
+               expression=str(value), unit=&quot;mm&quot;)</code></pre>
+<h2 id="features">Fillet and hole features</h2>
+<p>In the tested Plate example, fillet selection uses native edge pick
+coordinates. Hole positions likewise use the native command parameters.
+SCPC does not translate a higher-level edge or face selection model.</p>
+<pre><code>script.add(&quot;solid.fillet&quot;, body=&quot;Plate&quot;, radius=2,
+           edges=[[-50, -30, 5], [50, -30, 5],
+                  [50, 30, 5], [-50, 30, 5]])
+
+for x, y in ((-35, -15), (35, -15), (35, 15), (-35, 15)):
+    script.add(&quot;solid.hole&quot;, position=[x, y, 10],
+               diameter=8, targets=[&quot;Plate&quot;])</code></pre>
+<p>See the <a href="../../examples/plate/">full Plate source and the
+native JSON sequence</a> side by side. It is tested by actually
+evaluating the generated SolidCraft model, not just its command count.</p>
+<h2 id="strict">Native validation, not guesswork</h2>
+<p>The CLI is invoked with <code>--param-check strict</code>.
+That is a native check, but it does not guarantee every unexpected
+parameter is rejected or every geometrical outcome matches your intent.
+Verify the actual saved BRep, feature history and dimensions.</p>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

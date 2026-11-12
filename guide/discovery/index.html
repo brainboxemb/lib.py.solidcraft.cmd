@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Discovering the SolidCraft API — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / Discovering the SolidCraft API</p><h1>Discovering the SolidCraft API</h1><p class="guide-lead">Inspect installed native command IDs and live command input/output schemas.</p>
+<h2 id="registry">List the installed native command registry</h2>
+<p>Instead of maintaining a parallel command catalogue, SCPC asks your
+installed native CLI what it supports:</p>
+<pre><code>python -m scpc --commands
+# Or, inside Python:
+from scpc import commands
+registry = commands()</code></pre>
+<p>This calls <code>solidcraft-cli commands</code>. The exact
+result structure is defined by the SolidCraft version on your machine.
+No SCPC-generated signatures or hand-written parameter tables are used.</p>
+<h2 id="schema">Get a command's live schema</h2>
+<p>With an authenticated, running SolidCraft desktop session,
+<code>engine.describe</code> returns the native input/output
+description for one command:</p>
+<pre><code>python -m scpc --describe solid.extrude
+# Or, inside Python:
+from scpc import describe
+schema = describe(&quot;solid.extrude&quot;)</code></pre>
+<p><code>--describe</code> uses the authenticated local GUI connection.
+It is not a standalone offline command. A missing GUI connection or
+unavailable schema is a real limitation; never invent parameters.</p>
+<h2 id="explorer">Command Explorer: later, not a dependency</h2>
+<p>A future Explorer can search the command registry, display the native
+parameter schema and export SCPC source. It should use the same
+<code>commands()</code> and <code>describe()</code> API, with a
+raw JSON editor when a typed field is unknown. The library works
+without a GUI, VS Code extension or Explorer.</p>
+<h2 id="versions">Compatibility</h2>
+<p>The native regression tests currently qualify SolidCraft
+<strong>0.30.1</strong>. For a different version, inspect its
+<code>commands</code> and <code>engine.describe</code> results, then
+test the actual geometry. A syntactically valid exported script is not
+a guarantee of compatibility.</p>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

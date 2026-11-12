@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Getting started — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / Getting started</p><h1>Getting started</h1><p class="guide-lead">Install SCPC, write a small Plate, export native commands and run them.</p>
+<h2 id="purpose">Why SCPC exists</h2>
+<p><strong>SCPC</strong> (SolidCraft Python Commands) creates the exact native
+<code>{"commands":[{"command":"…","params":{…}}]}</code> data structure
+accepted by SolidCraft. You write ordinary Python for loops, variables and
+reuse, but every <code>script.add()</code> names a real SolidCraft operation.
+There is no separate geometry language.</p>
+<p><strong>SCPF (Forge)</strong> provides higher-level modelling objects,
+while <strong>SCPC</strong> exposes native commands directly. Both can create
+editable SolidCraft designs, but they are deliberately independent.</p>
+<h2 id="install">Install on your machine</h2>
+<p>From the root of <code>lib.py.solidcraft.cmd</code>, activate your normal
+Python environment and install the library in editable mode:</p>
+<pre><code>conda activate brainboxemb-dev-tools
+python -m pip install -e .
+python -m unittest discover -s tests -p &quot;test_*.py&quot; -v</code></pre>
+<h2 id="first-model">Write your first script</h2>
+<p>Save the following as <code>model.py</code>. A Python source file defines
+one non-empty <code>Script</code>; it does not require a
+<code>main()</code> function or <code>show()</code>.</p>
+<pre><code>from scpc import Script
+
+script = Script()
+script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Base&quot;)
+script.add(&quot;sketch.rectangle.two_point&quot;, p0=[0, 0], p1=[100, 60])
+script.add(&quot;sketch.finish&quot;)
+script.add(&quot;solid.extrude&quot;, distance=&quot;10 mm&quot;, body_name=&quot;Plate&quot;)</code></pre>
+<p>The real <a href="../../examples/plate/">Plate example</a> also defines
+parameters, rounds its vertical edges and adds four holes; that example is
+part of the native CI tests.</p>
+<h2 id="export">Export, inspect and execute</h2>
+<pre><code>python -m scpc model.py --out output/plate.json
+python -m scpc model.py --run --save output/plate.sc</code></pre>
+<p><code>--out</code> only exports JSON. <code>--run</code> uses the
+installed <code>solidcraft-cli</code> and can save an editable
+<code>.sc</code> design. You can run the JSON file later, without
+re-running the Python source:</p>
+<pre><code>python -m scpc output/plate.json --run --save output/replayed.sc</code></pre>
+<div class="notice"><strong>Two separate checks.</strong>
+Python accepting a command and SolidCraft accepting the command are not
+the same as proving the finished geometry is correct. See
+<a href="../verification/">Verification and testing</a>.</div>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

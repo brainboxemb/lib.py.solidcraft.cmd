@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Verification and testing — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / Verification and testing</p><h1>Verification and testing</h1><p class="guide-lead">Separate Python, local protocol and real CAD-engine tests; understand what each proves.</p>
+<h2 id="offline">1. Offline Python and local socket tests</h2>
+<pre><code>.\scripts\test.ps1
+# Or:
+python -m unittest discover -s tests -p &quot;test_*.py&quot; -v</code></pre>
+<p>These verify the Script data contract, CLI arguments, JSON
+round-trips and fake authenticated localhost socket exchanges for
+<code>engine.describe</code> and <code>engine.batch</code>.
+The fake endpoint tests only the wire protocol; it does not create
+or inspect CAD geometry.</p>
+<h2 id="native">2. Run the real native SolidCraft engine</h2>
+<pre><code>.\scripts\test.ps1 -Native
+# Or, with solidcraft-cli 0.30.1 installed:
+python tests/native_smoke.py --output-dir output/native-smoke</code></pre>
+<p>The native test checks the installed version and command registry,
+exports the Python Plate, runs it headlessly, opens its saved editable
+<code>.sc</code> container and evaluates its body and feature history.
+It independently replays the exported JSON and checks that both
+results have matching bounding boxes and timeline length.
+An intentionally invalid command must be rejected.</p>
+<p>The expected Plate is one body measuring
+<strong>100 × 60 × 10 mm</strong>, with an error-free native
+feature timeline.</p>
+<h2 id="ci">3. Continuous integration</h2>
+<p>GitHub Actions runs the Python/socket suite on Linux, the
+documented PowerShell entry point on Windows and an actual
+checksum-verified SolidCraft 0.30.1 native CLI run.
+The CAD repository also compares independently authored
+SCPF and SCPC models. The Pages site is published only after the
+library's required CI jobs succeed.</p>
+<h2 id="manual">4. The desktop GUI still needs manual inspection</h2>
+<p>Automated protocol tests do not prove an open GUI accepts a live
+request or that a feature is displayed as intended. For live
+testing, open an <strong>empty design</strong>, enable the Assistant
+connection, execute a known example with <code>--connect</code>,
+and inspect its bodies and feature tree.</p>
+<div class="notice"><strong>Principle:</strong>
+Valid Python is not necessarily valid SolidCraft JSON; valid JSON is
+not necessarily a successful native command; successful commands do
+not by themselves prove the intended geometry.</div>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

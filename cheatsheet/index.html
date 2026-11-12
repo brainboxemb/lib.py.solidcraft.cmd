@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>Cheatsheet — SCPC</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../">Overview</a>
+        <a href="../examples/plate/">Plate example</a>
+        <a href="../guide/">API Guide</a>
+        <a href="../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap"><p class="crumb"><a href="../">← Overview</a> / Cheatsheet</p><section class="hero small"><p class="kicker">SCPC QUICK REFERENCE</p><h1>Cheatsheet</h1><p class="lead">The small public Script interface and native CLI commands at a glance. For context and limitations, read the <a href="../guide/">complete API Guide</a>.</p></section><div class="notice"><strong>About native parameters.</strong> Command IDs and parameter schemas belong to your installed SolidCraft engine; query them using <code>--commands</code> and <code>--describe</code>. These examples are not a complete catalogue of SolidCraft commands.</div><section class="cheat-section"><h2>Build a command script</h2><div class="reference-grid"><article class="reference"><h3><code>Script() + add()</code></h3><p>Append native command IDs, in order.</p><pre><code>script = Script()
+script.add(&quot;sketch.create&quot;, plane=&quot;XY&quot;, name=&quot;Base&quot;)</code></pre><a href="../guide/script/">Read explanation →</a></article><article class="reference"><h3><code>script.commands</code></h3><p>Get a detached copy of the command list.</p><pre><code>entries = script.commands</code></pre><a href="../guide/script/">Read explanation →</a></article><article class="reference"><h3><code>to_dict() / to_json()</code></h3><p>Export native data without running CAD.</p><pre><code>document = script.to_dict()
+text = script.to_json()</code></pre><a href="../guide/script/">Read explanation →</a></article><article class="reference"><h3><code>save(path)</code></h3><p>Write native command JSON.</p><pre><code>script.save(&quot;output/commands.json&quot;)</code></pre><a href="../guide/script/">Read explanation →</a></article></div></section><section class="cheat-section"><h2>Reopen existing commands</h2><div class="reference-grid"><article class="reference"><h3><code>Script.load(path)</code></h3><p>Import JSON as data, without executing Python.</p><pre><code>plan = Script.load(&quot;output/commands.json&quot;)</code></pre><a href="../guide/script/">Read explanation →</a></article><article class="reference"><h3><code>from_json() / from_dict()</code></h3><p>Import a native JSON string or dictionary.</p><pre><code>plan = Script.from_json(text)
+plan = Script.from_dict(document)</code></pre><a href="../guide/script/">Read explanation →</a></article><article class="reference"><h3><code>load_script(path)</code></h3><p>Load ONE non-empty Script from trusted Python.</p><pre><code>plan = load_script(&quot;model.py&quot;)</code></pre><a href="../guide/script/">Read explanation →</a></article></div></section><section class="cheat-section"><h2>Run and inspect</h2><div class="reference-grid"><article class="reference"><h3><code>--out</code></h3><p>Export native command JSON without CAD.</p><pre><code>python -m scpc model.py --out output/plate.json</code></pre><a href="../guide/execution/">Read explanation →</a></article><article class="reference"><h3><code>--run --save</code></h3><p>Run in native CLI and save editable SolidCraft .sc.</p><pre><code>python -m scpc model.py --run --save output/plate.sc</code></pre><a href="../guide/execution/">Read explanation →</a></article><article class="reference"><h3><code>JSON replay</code></h3><p>Run previously exported commands, not Python source.</p><pre><code>python -m scpc output/plate.json --run</code></pre><a href="../guide/execution/">Read explanation →</a></article><article class="reference"><h3><code>--connect</code></h3><p>Apply one authenticated batch to an open GUI.</p><pre><code>python -m scpc model.py --connect</code></pre><a href="../guide/execution/">Read explanation →</a></article><article class="reference"><h3><code>--commands</code></h3><p>Query the installed native command registry.</p><pre><code>python -m scpc --commands</code></pre><a href="../guide/discovery/">Read explanation →</a></article><article class="reference"><h3><code>--describe</code></h3><p>Read one command schema from the running GUI.</p><pre><code>python -m scpc --describe solid.extrude</code></pre><a href="../guide/discovery/">Read explanation →</a></article></div></section></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SolidCraft Python Commands: native SolidCraft commands written in Python.">
+  <title>CLI and GUI execution — SCPC</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="../../"><strong>SCPC</strong> <span>SolidCraft Python Commands</span></a>
+      <nav aria-label="Main navigation">
+        <a href="../../">Overview</a>
+        <a href="../../examples/plate/">Plate example</a>
+        <a href="../../guide/">API Guide</a>
+        <a href="../../cheatsheet/">Cheatsheet</a>
+        <a href="https://github.com/brainboxemb/lib.py.solidcraft.cmd">Source ↗</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap guide-layout"><aside class="guide-sidebar" aria-label="API chapters"><h2>API Guide</h2><a href="../">All chapters</a><a href="../getting-started/">Getting started</a><a href="../script/">Script API and JSON</a><a href="../native-commands/">Native commands and features</a><a href="../execution/">CLI and GUI execution</a><a href="../discovery/">Discovering the SolidCraft API</a><a href="../verification/">Verification and testing</a></aside><article class="guide-article"><p class="crumb"><a href="../">← API Guide</a> / CLI and GUI execution</p><h1>CLI and GUI execution</h1><p class="guide-lead">Export-only, headless native SolidCraft and authenticated live GUI batches.</p>
+<h2 id="export">Export without starting SolidCraft</h2>
+<pre><code>python -m scpc examples/plate/model.py --out output/plate.json</code></pre>
+<p>This creates only the command JSON. It does not change any open GUI
+document and does not test SolidCraft's geometry engine.</p>
+<h2 id="native">Run the native command-line engine</h2>
+<pre><code>python -m scpc examples/plate/model.py --run --save output/plate.sc
+python -m scpc output/plate.json --run --save output/plate-replay.sc</code></pre>
+<p><code>--run</code> requires the installed
+<code>solidcraft-cli</code>. Use <code>--cli PATH</code> if the CLI is
+not on PATH. <code>--save</code> is valid only with
+<code>--run</code>. SCPC executes the command list through SolidCraft
+with native strict parameter checking and propagates errors.</p>
+<h2 id="desktop">Apply commands to the open desktop GUI</h2>
+<pre><code>python -m scpc examples/plate/model.py --connect
+python -m scpc output/plate.json --connect</code></pre>
+<p>This sends the ordered commands as one authenticated
+<code>engine.batch</code> request to an <strong>already running</strong>
+SolidCraft desktop process, operating on its current design.
+Enable <em>Preferences → Assistant → Let AI agents connect</em> in
+SolidCraft. SCPC does not launch the app, create or clear a document,
+or save the active file automatically.</p>
+<p>SCPC requests <code>param_check=strict</code> and
+<code>rollback=true</code> for the batch. If a step fails, the
+native error and reported rollback result are shown. If a request
+times out, the GUI operation may still be running: check the open
+document before attempting the same batch again.</p>
+<h2 id="python">Call the same functions directly from Python</h2>
+<pre><code>from scpc import run_cli, send_batch
+
+run_cli(script, save=&quot;output/plate.sc&quot;)
+send_batch(script.commands)</code></pre>
+<div class="notice"><strong>Different execution modes:</strong>
+<code>--out</code> is offline serialisation; <code>--run</code> is a
+separate native headless session; <code>--connect</code> changes the
+currently open GUI document. Choose the mode intentionally.</div>
+</article></main>
+  <footer><div class="wrap footer-inner">
+    <span>SCPC describes native commands; SolidCraft builds the CAD model.</span>
+    <a href="https://brainboxemb.github.io/lib.py.solidcraft.forge/">Forge library</a>
+    <a href="https://brainboxemb.github.io/2026-011-02.cad.solidcraft/">CAD projects</a>
+  </div></footer>
+</body>
+</html>
