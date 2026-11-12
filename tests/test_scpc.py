@@ -41,6 +41,58 @@ class ScriptTests(unittest.TestCase):
             script.add("", width=1)
         self.assertEqual(len(script), 1)
 
+    def test_native_json_roundtrip_and_no_python_execution(self):
+        original = Script().add("solid.example", nested={"location": [1, 2]},
+                                enabled=True)
+        document = original.to_dict()
+        imported = Script.from_dict(document)
+        self.assertEqual(imported.to_dict(), document)
+        document["commands"][0]["params"]["nested"]["location"][0] = 99
+        self.assertEqual(imported.commands[0]["params"]["nested"]["location"], [1, 2])
+
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "commands.json"
+            target = Path(folder) / "copy.json"
+            original.save(source)
+            self.assertEqual(Script.load(source).to_dict(), original.to_dict())
+            self.assertEqual(main([str(source), "--out", str(target)]), 0)
+            self.assertEqual(json.loads(target.read_text(encoding="utf-8")),
+                             original.to_dict())
+
+            # Replaying JSON is routed to the existing native runner.
+            with patch("scpc.__main__.run_cli", return_value="{}") as runner:
+                self.assertEqual(main([str(source), "--run"]), 0)
+            self.assertEqual(runner.call_args.args[0].to_dict(),
+                             original.to_dict())
+
+    def test_native_json_import_rejects_invalid_structure(self):
+        bad_documents = [
+            [],
+            {},
+            {"commands": [], "unexpected": True},
+            {"commands": "not a list"},
+            {"commands": [42]},
+            {"commands": [{"command": "solid.example"}]},
+            {"commands": [{"command": "solid.example", "params": []}]},
+            {"commands": [{"command": "", "params": {}}]},
+            {"commands": [{"command": "solid.example", "params": {},
+                            "ignored": "must not be dropped"}]},
+            {"commands": [{"command": "solid.example",
+                            "params": {"size": math.inf}}]},
+        ]
+        for document in bad_documents:
+            with self.subTest(document=document):
+                with self.assertRaises(ValueError):
+                    Script.from_dict(document)
+        with self.assertRaisesRegex(ValueError, "Invalid native command JSON"):
+            Script.from_json("{broken")
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "commands.json"
+            source.write_text("{}", encoding="utf-8")
+            with self.assertRaises(SystemExit) as failure:
+                main([str(source), "--run"])
+            self.assertEqual(failure.exception.code, 1)
+
     def test_export_cli_runner(self):
         src = ROOT / "examples/plate/model.py"
         script = load_script(src)

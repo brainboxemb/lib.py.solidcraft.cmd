@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 
 from .runner import load_script
+from .script import Script
 from .native import run_cli, CliError
 from .live import send_batch, LiveError
 from .discovery import commands, describe
@@ -11,7 +12,7 @@ from .discovery import commands, describe
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("script", nargs="?", type=Path,
-                        help="Trusted Python file containing one SCPC Script")
+                        help="Trusted SCPC Python model.py or native commands.json")
     actions = parser.add_mutually_exclusive_group()
     actions.add_argument("--out", type=Path, help="Export standard native JSON")
     actions.add_argument("--run", action="store_true",
@@ -45,7 +46,17 @@ def main(argv=None):
         parser.error("a model.py file is required")
     if not (args.out or args.run or args.connect):
         parser.error("choose --out, --run or --connect")
-    script = load_script(args.script)
+    if args.script.suffix.lower() == ".json":
+        # JSON is data, never executed as Python. Keep the explicit .json
+        # extension to prevent ambiguous or unsafe source interpretation.
+        try:
+            script = Script.load(args.script)
+        except (OSError, ValueError) as exc:
+            parser.exit(1, f"SCPC JSON: {exc}\n")
+        if not len(script):
+            parser.exit(1, "SCPC JSON: the command document is empty\n")
+    else:
+        script = load_script(args.script)
     if args.out is not None:
         path = script.save(args.out)
         print(f"{path}: {len(script)} native SolidCraft commands")

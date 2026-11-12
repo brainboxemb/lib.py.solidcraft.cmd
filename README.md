@@ -59,8 +59,9 @@ To also test with your installed **native SolidCraft 0.30.1** CLI:
 ```
 
 The native test runs our Plate Python script through the actual CAD engine,
-saves an editable `.sc` document, measures its 3D geometry, checks the
-feature timeline and verifies that SolidCraft **rejects an invalid command**.
+replays its exported JSON independently, compares both real CAD results,
+saves editable `.sc` documents, checks feature timelines and verifies
+that SolidCraft **rejects an invalid command**.
 It also checks that native command discovery comes from the installed CLI.
 
 GitHub Actions independently runs **both** test levels on every PR:
@@ -102,6 +103,18 @@ Run the same script with the installed native SolidCraft CLI, using
 ```powershell
 python -m scpc examples/plate/model.py --run --save output/plate.sc
 ```
+
+You can also **replay the exported native JSON directly**, without running
+Python model source a second time. JSON is treated only as data:
+
+```powershell
+python -m scpc output/plate.json --run --save output/plate-from-json.sc
+```
+
+In Python, `Script.load("output/plate.json")` imports the same command sequence;
+`Script.from_dict(...)` and `Script.from_json(...)` also support native JSON
+round-trips. This does not verify command meaning: SolidCraft is still the
+authority for validation and actual geometry.
 
 Or apply to an **already open, empty** SolidCraft desktop design using
 its authenticated local control channel:

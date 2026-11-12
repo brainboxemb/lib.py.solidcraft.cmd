@@ -65,6 +65,9 @@ The test performs this sequence:
 - Generate the Plate command JSON from `examples/plate/model.py`.
 - Run the same SCPC Python script in the **real SolidCraft engine**
   with strict native parameter validation, saving `plate.sc`.
+- Replay the **exported JSON directly through SCPC** and native SolidCraft,
+  save a separate `.sc`, and compare its body geometry and timeline
+  against the original Python-driven run.
 - Confirm `plate.sc` is a valid native SolidCraft document.
 - Evaluate its BRep: exactly one Plate, bounding box
   **100 × 60 × 10 mm**, with a nonempty error-free feature timeline.
