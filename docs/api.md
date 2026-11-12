@@ -29,6 +29,13 @@ The `Script` constructor does not connect to SolidCraft or open files.
 It rejects invalid JSON types and nonfinite numbers, but **does not
 claim to validate the meaning of native command parameters**.
 
+To work with an existing native command document, use
+`Script.load(path)`, `Script.from_json(text)`, or `Script.from_dict(data)`.
+These preserve the command order and parameters, reject malformed structures,
+and do not evaluate any Python source. Input must have exactly the native
+`{"commands": [{"command": "...", "params": {...}}, ...]}` shape.
+Importing JSON does not validate whether SolidCraft accepts the commands.
+
 ## Load and execute a Python model
 
 `load_script(path)` evaluates a **trusted** Python source file that
@@ -39,6 +46,8 @@ Python models. There is no mandatory `main()` or `show()`.
 python -m scpc examples/plate/model.py --out output/plate.json
 python -m scpc examples/plate/model.py --run --save output/plate.sc
 python -m scpc examples/plate/model.py --connect
+# Re-run native JSON without evaluating the Python model:
+python -m scpc output/plate.json --run --save output/plate-from-json.sc
 ```
 
 - `--out` only exports native JSON; no CAD engine is started.

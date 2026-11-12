@@ -31,6 +31,48 @@ class Script:
     def __init__(self):
         self._commands = []
 
+    @classmethod
+    def from_dict(cls, document):
+        """Import the exact native {"commands": [...]} format.
+
+        Reject unexpected fields rather than silently changing or dropping
+        native commands. This only checks JSON structure, not CAD semantics.
+        """
+        if not isinstance(document, dict) or set(document) != {"commands"}:
+            raise ValueError("Expected a native document containing only 'commands'")
+        entries = document["commands"]
+        if not isinstance(entries, list):
+            raise ValueError("Native 'commands' must be a list")
+        script = cls()
+        for index, entry in enumerate(entries):
+            if (not isinstance(entry, dict)
+                    or set(entry) != {"command", "params"}
+                    or not isinstance(entry["params"], dict)):
+                raise ValueError(
+                    f"Invalid native command at index {index}: "
+                    "expected 'command' and object 'params'"
+                )
+            try:
+                script.add(entry["command"], **entry["params"])
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"Invalid native command at index {index}: {exc}"
+                ) from exc
+        return script
+
+    @classmethod
+    def from_json(cls, text):
+        """Parse a native command document; never evaluate Python source."""
+        try:
+            return cls.from_dict(json.loads(text))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid native command JSON: {exc}") from exc
+
+    @classmethod
+    def load(cls, path):
+        """Read commands saved as native JSON by SCPC or SolidCraft."""
+        return cls.from_json(Path(path).read_text(encoding="utf-8"))
+
     def add(self, command: str, /, **params):
         if not isinstance(command, str) or not command.strip():
             raise ValueError("A native SolidCraft command ID is required")

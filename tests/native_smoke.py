@@ -112,6 +112,26 @@ def verify(output, cli):
     assert all(item.get("error") is None for item in timeline), timeline
     print("Native .sc document: one real Plate body, 100×60×10 mm, editable history")
 
+    # Replay the exported JSON itself, independent of the original Python
+    # model loader, through the *same real native* SolidCraft engine.
+    replay_file = output / "plate-json-replay.sc"
+    replay_measurements = output / "json-replay-measurements.json"
+    run(sys.executable, "-m", "scpc", commands_file, "--run", "--save",
+        replay_file, "--cli", cli)
+    assert replay_file.is_file() and zipfile.is_zipfile(replay_file)
+    run(cli, "eval", replay_file, "--json-out", replay_measurements)
+    replay = json.loads(replay_measurements.read_text(encoding="utf-8"))
+    assert replay["body_count"] == measured["body_count"] == 1
+    replay_body = replay["bodies"][0]
+    assert replay_body["name"] == body["name"] == "Plate"
+    for bound in ("min", "max"):
+        for actual, wanted in zip(replay_body["bbox"][bound], body["bbox"][bound]):
+            assert abs(actual - wanted) < 0.001, (bound, actual, wanted)
+    replay_timeline = replay.get("timeline") or []
+    assert len(replay_timeline) == len(timeline), (replay_timeline, timeline)
+    assert all(item.get("error") is None for item in replay_timeline), replay_timeline
+    print("Native JSON replay: geometry and editable feature count match Python")
+
     # Exercise native strict failure, not just JSON syntax validation.
     bad = output / "invalid-command.json"
     bad.write_text(json.dumps({
