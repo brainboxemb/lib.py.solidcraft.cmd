@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 
 from scpc import load_script
+from guides import GUIDES, CHEATSHEET
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_URL = "https://github.com/brainboxemb/lib.py.solidcraft.cmd"
@@ -40,7 +41,8 @@ def layout(title, body, prefix="."):
       <nav aria-label="Main navigation">
         <a href="{prefix}/">Overview</a>
         <a href="{prefix}/examples/plate/">Plate example</a>
-        <a href="{REPO_URL}/blob/main/docs/api.md">API reference ↗</a>
+        <a href="{prefix}/guide/">API Guide</a>
+        <a href="{prefix}/cheatsheet/">Cheatsheet</a>
         <a href="{REPO_URL}">Source ↗</a>
       </nav>
     </div>
@@ -88,7 +90,8 @@ script.add("solid.extrude", distance="10 mm", body_name="Plate")"""
        Build an ordered command script without manually writing JSON or creating
        a second CAD modelling language.</p>
     <div class="actions">
-      <a class="button button-primary" href="examples/plate/">Explore the Plate example →</a>
+      <a class="button button-primary" href="guide/">Read the API Guide →</a>
+      <a class="button button-secondary" href="examples/plate/">Explore the Plate example →</a>
       <a class="button button-secondary" href="{REPO_URL}">View source on GitHub ↗</a>
     </div>
     <div class="hero-graphic" aria-hidden="true">
@@ -130,10 +133,12 @@ script.add("solid.extrude", distance="10 mm", body_name="Plate")"""
   <section class="resources">
     <h2>Learn and test</h2>
     <div class="resource-grid">
-      <a href="{REPO_URL}/blob/main/docs/api.md"><strong>SCPC API reference ↗</strong>
-        <span>Script, export, CLI execution, GUI connection and discovery.</span></a>
-      <a href="{REPO_URL}/blob/main/docs/testing.md"><strong>Verification &amp; testing ↗</strong>
-        <span>Python tests, authenticated control protocol and native SolidCraft 0.30.1 checks.</span></a>
+      <a href="guide/"><strong>SCPC API Guide →</strong>
+        <span>Six chapters covering the Python API, native commands, execution, discovery and verification.</span></a>
+      <a href="cheatsheet/"><strong>Quick cheatsheet →</strong>
+        <span>Common Script calls and CLI commands with runnable examples.</span></a>
+      <a href="guide/verification/"><strong>Verification &amp; testing →</strong>
+        <span>Python tests, authenticated control protocol and real SolidCraft 0.30.1 checks.</span></a>
       <a href="{FORGE_URL}"><strong>SolidCraft Forge (SCPF) ↗</strong>
         <span>A separate higher-level Python modelling interface.</span></a>
       <a href="{CAD_URL}"><strong>CAD projects ↗</strong>
@@ -171,12 +176,89 @@ script.add("solid.extrude", distance="10 mm", body_name="Plate")"""
     The Python API and JSON format are tested independently of the actual
     CAD geometry. A separate CI job runs the native SolidCraft 0.30.1 engine,
     checks the resulting Plate and its feature history, and reports failures.
-    <a href="{REPO_URL}/blob/main/docs/testing.md">Read the test methodology →</a>
+    <a href="../../guide/verification/">Read the test methodology →</a>
   </section>
 </main>"""
     write(example_dir / "index.html",
           layout("Plate example", detail, prefix="../.."))
-    print(f"SCPC Pages site: {len(commands)} commands, commit {commit}, output {output}")
+
+    # Documentation is a first-class part of SCPC Pages, as in the SCPF
+    # library site. Keep chapter content in one maintained source: guides.py.
+    guide_cards = []
+    for chapter in GUIDES:
+        slug = chapter["slug"]
+        sidebar = "".join(
+            f'<a href="../{escape(item["slug"])}/">{escape(item["title"])}</a>'
+            for item in GUIDES
+        )
+        body = (
+            '<main class="wrap guide-layout">'
+            '<aside class="guide-sidebar" aria-label="API chapters">'
+            '<h2>API Guide</h2><a href="../">All chapters</a>'
+            + sidebar + '</aside>'
+            '<article class="guide-article">'
+            + f'<p class="crumb"><a href="../">← API Guide</a> / {escape(chapter["title"])}</p>'
+            + f'<h1>{escape(chapter["title"])}</h1>'
+            + f'<p class="guide-lead">{escape(chapter["summary"])}</p>'
+            + chapter["body"] + '</article></main>'
+        )
+        write(output / "guide" / slug / "index.html",
+              layout(chapter["title"], body, prefix="../.."))
+        guide_cards.append(
+            f'<article class="reference"><h2><a href="{escape(slug)}/">'
+            f'{escape(chapter["title"])}</a></h2>'
+            f'<p>{escape(chapter["summary"])}</p></article>'
+        )
+
+    guide_index = (
+        '<main class="wrap"><section class="hero small">'
+        '<p class="kicker">SCPC PYTHON LIBRARY</p><h1>API Guide</h1>'
+        '<p class="lead">Learn the public Python interface and the native '
+        'SolidCraft command workflow, with tested examples and clear limits. '
+        'For a fast lookup, use the cheatsheet.</p>'
+        '<div class="actions"><a class="button button-primary" '
+        'href="../cheatsheet/">Quick cheatsheet →</a></div>'
+        '</section><div class="reference-grid">'
+        + "".join(guide_cards) + '</div></main>'
+    )
+    write(output / "guide" / "index.html",
+          layout("API Guide", guide_index, prefix=".."))
+
+    sections = []
+    for heading, items in CHEATSHEET:
+        entries = []
+        for title, description, snippet, chapter in items:
+            entries.append(
+                '<article class="reference">'
+                f'<h3><code>{escape(title)}</code></h3>'
+                f'<p>{escape(description)}</p>'
+                f'<pre><code>{escape(snippet)}</code></pre>'
+                f'<a href="../guide/{escape(chapter)}/">Read explanation →</a>'
+                '</article>'
+            )
+        sections.append(
+            '<section class="cheat-section">'
+            f'<h2>{escape(heading)}</h2>'
+            '<div class="reference-grid">' + "".join(entries) + '</div></section>'
+        )
+    cheatsheet_page = (
+        '<main class="wrap"><p class="crumb"><a href="../">← Overview</a> / Cheatsheet</p>'
+        '<section class="hero small"><p class="kicker">SCPC QUICK REFERENCE</p>'
+        '<h1>Cheatsheet</h1>'
+        '<p class="lead">The small public Script interface and native CLI '
+        'commands at a glance. For context and limitations, read the '
+        '<a href="../guide/">complete API Guide</a>.</p></section>'
+        '<div class="notice"><strong>About native parameters.</strong> '
+        'Command IDs and parameter schemas belong to your installed SolidCraft '
+        'engine; query them using <code>--commands</code> and '
+        '<code>--describe</code>. These examples are not a complete '
+        'catalogue of SolidCraft commands.</div>'
+        + "".join(sections) + '</main>'
+    )
+    write(output / "cheatsheet" / "index.html",
+          layout("Cheatsheet", cheatsheet_page, prefix=".."))
+    print(f"SCPC Pages: {len(commands)} commands, {len(GUIDES)} API chapters, "
+          f"cheatsheet, commit {commit}, output {output}")
 
 
 if __name__ == "__main__":
